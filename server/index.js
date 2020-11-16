@@ -20,9 +20,9 @@ app.use(cookieParser());
 
 
 // HOME
-app.get('/', function (req, res) {
-    res.send('hi there ')
-})
+// app.get('/', function (req, res) {
+//     res.send('hi there ')
+// })
 
 
 app.get('/api/user/auth', authent, (req, res) => {
