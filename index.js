@@ -86,4 +86,20 @@ app.post('/api/user/login', (req, res) =>{
     })
 })
 
+
+//get - when we don't put any data
+app.get("/api/user/logout", authent, (req, res) =>{
+    User.findOneAndUpdate(
+        {_id: req.user._id}, 
+        {token: ""}, 
+        (error, data)=>{
+            if(error) return res.json({succes: false, error})
+            return res.status(200).send({
+                Logoutsuccess: true
+            })
+        }
+    )
+})
+
+
 app.listen(port);
