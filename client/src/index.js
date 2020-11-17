@@ -4,22 +4,24 @@ import './index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom"
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
+import promiseMiddleware from "redux-promise";
+import ReduxThunk from "redux-thunk";
+import Reducer from "./reducers";
+import "materialize-css/dist/css/materialize.min.css";
 
-// import {
-//   BrowserRouter as Router,
-//   Switch,
-//   Route,
-//   Link,
-//   BrowserRouter
-// } from "react-router-dom";
+const createStoreWithMid = applyMiddleware(promiseMiddleware, ReduxThunk)(createStore);
+
 
 ReactDOM.render(
-  //<React.StrictMode>
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>,
-    
-  //</React.StrictMode>,
+  
+  <Provider store={ createStoreWithMid(Reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()) }>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>,
+  </Provider>,
+
   document.getElementById('root')
 );
 

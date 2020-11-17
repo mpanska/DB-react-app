@@ -25,7 +25,7 @@ app.use(cookieParser());
 // })
 
 
-app.get('/api/user/auth', authent, (req, res) => {
+app.get('/api/users/auth', authent, (req, res) => {
     res.status(200).json({ //we send some data to cliet, what we got from auth
         _id: req._id,
         authentificated: true,
@@ -53,22 +53,22 @@ app.post('/api/users/register', (req, res) => {
     })
 })
 
-app.post('/api/user/login', (req, res) =>{
+app.post('/api/users/login', (req, res) =>{
     //find email
     User.findOne({email: req.body.email}, (error, user) =>{ 
-        if(error) return res.json({success: false})
+        if(error) return res.json({loginSuccess: false})
         //if there is no email like this in DB -> error, else->user with the email
         if(!user) return res.json({
-            success: false,
+            loginSuccess: false,
             message: 'Login failed, no such email in DB'
         })
     
         //compare typed passwrrd with one in 
         user.comparePassword(req.body.password, (error, match) =>{//plain password and callback
-            if(error) return res.json({success: false})
+            if(error) return res.json({loginSuccess: false})
                 
             if(!match) return res.json({
-                success: false,
+                loginSuccess: false,
                 message: 'The password is wrong'
             })
             
@@ -82,7 +82,7 @@ app.post('/api/user/login', (req, res) =>{
             } 
             //put token into cookie
             res.cookie("x_auth", user.token).status(200).json({
-                success: true
+                loginSuccess: true
             });
         })
     })
@@ -90,7 +90,7 @@ app.post('/api/user/login', (req, res) =>{
 
 
 //get - when we don't put any data
-app.get("/api/user/logout", authent, (req, res) =>{
+app.get("/api/users/logout", authent, (req, res) =>{
     User.findOneAndUpdate(
         {_id: req.user._id}, 
         {token: ""}, 
