@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { loginUser } from '../../actions/user_actions'
+import { loginUser } from '../../actions/user_actions';
+import { Link } from 'react-router-dom';
 
 // styling done with  materializecss
 
@@ -110,6 +111,17 @@ class LoginRegister extends Component {
                                 >
                                     Log in
                                 </button>
+                            </div>
+                            <div className="col 12">
+                                <Link to="/register">
+                                    <button 
+                                        className="btn-large green"
+                                        type="submit"
+                                        name="action"
+                                    >
+                                        Sign up
+                                    </button>
+                                </Link>
                             </div>
                         </div>
 
