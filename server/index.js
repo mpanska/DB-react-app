@@ -1,107 +1,55 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-
-const config = require('./config/keys');
-const { User } = require('./model/user');
-const user = require('./model/user');
-const { authent } = require('./middleware/authent')
-
+const express = require("express");
 const app = express();
-const port = 5000;
+const path = require("path");
+const cors = require('cors')
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const config = require("./config/key");
+// const { User } = require('./model/user');
+// const user = require('./model/user');
 
-mongoose.connect(config.mongoURI, {useNewUrlParser:true, useUnifiedTopology: true})
-        .then(() =>console.log('Database is connected')).catch(err => console.error(err));
 
-app.use(bodyParser.urlencoded({extended: true})); //to use query string
+const mongoose = require("mongoose");
+const { userInfo } = require("os");
+const connect = mongoose.connect(config.mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB Connected...'))
+  .catch(err => console.log(err));
+
+app.use(cors())
+
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+app.use('/api/users', require('./routes/users'));
+app.use('/api/product', require('./routes/product'));
 
-// HOME
-// app.get('/', function (req, res) {
-//     res.send('hi there ')
+
+//use this to show the image you have in node js server to client (react js)
+//https://stackoverflow.com/questions/48914987/send-image-path-from-node-js-express-server-to-react-client
+app.use('/uploads', express.static('uploads'));
+
+// Serve static assets if in production
+if (process.env.NODE_ENV === "production") {
+
+  // Set static folder
+  app.use(express.static("client/build"));
+
+  // index.html for all page routes
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../client", "build", "index.html"));
+  });
+}
+
+// app.get('/admin', function(req, res){
+//   user.find({}, function(err, docs){
+//     if(err) res.json({success: false, err})
+//     else res.render('index', {user.docs})
+//   })
 // })
 
+const port = process.env.PORT || 5000
 
-app.get('/api/users/auth', authent, (req, res) => {
-    res.status(200).json({ //we send some data to cliet, what we got from auth
-        _id: req._id,
-        authentificated: true,
-        email: req.user.email,
-        name: req.user.name,
-        lastName: req.user.lastName,
-        role: req.user.role
-    })
-})
-
-
-//if client gives us a request, it will be json, to be able to read json use bodyparser
-app.post('/api/users/register', (req, res) => { 
-    //after reading this information we need to put in into our mongodb
-    const user = new User(req.body);
-
-    //this sends users data to the database
-    user.save((error, data) => {
-        if(error) return res.json({success: false, error});
-
-        res.status(200).json({
-            success: true,
-            userData: data
-        });
-    })
-})
-
-app.post('/api/users/login', (req, res) =>{
-    //find email
-    User.findOne({email: req.body.email}, (error, user) =>{ 
-        if(error) return res.json({loginSuccess: false})
-        //if there is no email like this in DB -> error, else->user with the email
-        if(!user) return res.json({
-            loginSuccess: false,
-            message: 'Login failed, no such email in DB'
-        })
-    
-        //compare typed passwrrd with one in 
-        user.comparePassword(req.body.password, (error, match) =>{//plain password and callback
-            if(error) return res.json({loginSuccess: false})
-                
-            if(!match) return res.json({
-                loginSuccess: false,
-                message: 'The password is wrong'
-            })
-            
-        })
-
-        //generate token
-        user.generateToken((error, user) =>{
-            if(error){
-                console.log('error in generatin token');
-                return res.status(400).send(error);
-            } 
-            //put token into cookie
-            res.cookie("x_auth", user.token).status(200).json({
-                loginSuccess: true
-            });
-        })
-    })
-})
-
-
-//get - when we don't put any data
-app.get("/api/users/logout", authent, (req, res) =>{
-    User.findOneAndUpdate(
-        {_id: req.user._id}, 
-        {token: ""}, 
-        (error, data)=>{
-            if(error) return res.json({succes: false, error})
-            return res.status(200).send({
-                Logoutsuccess: true
-            })
-        }
-    )
-})
-
-
-app.listen(port);
+app.listen(port, () => {
+  console.log(`Server Running at ${port}`)
+});
