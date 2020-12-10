@@ -24,7 +24,7 @@ function App() {
           <Route exact path="/" component={Auth(LandingPage, null)} />
           <Route exact path="/login" component={Auth(LoginPage, false)} />
           <Route exact path="/register" component={Auth(RegisterPage, false)} />
-          <Route exact path="/product/upload" component={Auth(UploadProduct, true)} />
+          <Route exact path="/product/upload" component={Auth(UploadProduct, true, null, true)} />
           <Route exact path="/product/:productId" component={Auth(DetailProductPage, null)} />
           <Route exact path="/user/cart" component={Auth(CartPage, null)} /> 
           <Route exact path="/history" component={Auth(HistoryPage, true)} /> 

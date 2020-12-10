@@ -30,6 +30,7 @@ export function updateUser(dataToSubmit, _id) {
     }
 }
 
+
 export function loginUser(dataToSubmit) {
     const request = axios.post(`${USER_SERVER}/login`, dataToSubmit)
         .then(response => response.data);
@@ -68,14 +69,9 @@ export function addToCart(_id) {
 }
 
 
-
 export function getCartItems(cartItems, userCart) {
     const request = axios.get(`/api/product/products_by_id?id=${cartItems}&type=array`)
         .then(response => {
-
-            //Make CartDetail inside Redux Store 
-            // We need to add quantity data to Product Information that come from Product Collection. 
-
             userCart.forEach(cartItem => {
                 response.data.forEach((productDetail, i) => {
                     if (cartItem.id === productDetail._id) {
@@ -92,8 +88,6 @@ export function getCartItems(cartItems, userCart) {
         payload: request
     }
 }
-
-
 
 
 export function removeCartItem(id) {

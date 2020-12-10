@@ -35,7 +35,6 @@ export class UploadProductPage extends Component {
     }
 
     handleChangeDecsription = (event) => {
-        // console.log(event.currentTarget.value)
         this.setState({ description: event.currentTarget.value })
     }
 
@@ -51,8 +50,7 @@ export class UploadProductPage extends Component {
         }
 
         if (!this.state.title || !this.state.description ||
-            !this.state.categories || !this.state.images
-            || !this.state.price) {
+            !this.state.categories || !this.state.images || !this.state.price) {
             return alert('Trzeba wypełnić wszystkie pola')
         }
 
@@ -68,12 +66,12 @@ export class UploadProductPage extends Component {
         axios.post('/api/product/uploadProduct', variables)
             .then(response => {
                 if (response.data.success) {
-                    alert('uploaded Successfully')
+                    alert('Dodano nowy produkt')
                     setTimeout(() => {
                         this.props.history.push('/')
                     }, 1000);
                 } else {
-                    alert('failed to upload')
+                    alert('Wystąpił błąd w trakcie dodania produktu')
                 }
             })
     }

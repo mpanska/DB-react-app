@@ -9,13 +9,13 @@ import SearchFeature from './Sections/SearchFeature';
 
 const { Meta } = Card;
 
+
 function LandingPage() {
     const [Products, setProducts] = useState([])
     const [Skip, setSkip] = useState(0)
     const [Limit, setLimit] = useState(8)
     const [PostSize, setPostSize] = useState()
     const [SearchTerms, setSearchTerms] = useState("")
-
     const [Filters, setFilters] = useState({
         categories: [], 
         price: []
@@ -47,7 +47,6 @@ function LandingPage() {
 
     const onLoadMore = () => {
         let skip = Skip + Limit;
-
         const variables = {
             skip: skip,
             limit: Limit,
@@ -61,7 +60,6 @@ function LandingPage() {
 
 
     const renderCards = Products.map((product, index) => {
-
         return <Col lg={6} md={8} xs={24}>
             <Card
                 hoverable={true}
@@ -106,13 +104,11 @@ function LandingPage() {
             newFilters[category] = priceValues
         }
         console.log(newFilters)
-
         showFilteredResults(newFilters)
         setFilters(newFilters)
     }
 
     const updateSearchTerms = (newSearchTerm) => {
-
         const variables = {
             skip: 0,
             limit: Limit,
@@ -121,7 +117,6 @@ function LandingPage() {
         }
         setSkip(0)
         setSearchTerms(newSearchTerm)
-
         getProducts(variables)
     }
 
@@ -132,12 +127,9 @@ function LandingPage() {
                 <h1> Drogeria </h1>
             </div>
 
-            {/* Search  */}
             <div style={{ margin: '1rem auto', width: '500px', height: '50px'}}>
                 <SearchFeature  refreshFunction={updateSearchTerms} />
             </div>
-
-            {/* Filter  */}
 
             <Row gutter={[16, 16]}>
                 <Col lg={12} xs={24} >

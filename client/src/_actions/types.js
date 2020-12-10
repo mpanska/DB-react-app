@@ -7,3 +7,4 @@ export const GET_CART_ITEMS_USER = 'get_cart_items_user';
 export const REMOVE_CART_ITEM_USER = 'remove_cart_item_user';
 export const ON_SUCCESS_BUY_USER = 'on_success_buy_user';
 export const UPDATE_USER = 'update_user';
+export const EDIT_PRODUCT = 'edit_product';

@@ -1,23 +1,8 @@
-import React,  { useEffect, useState }  from 'react';
-import Axios from 'axios';
-import { Collapse, Card, Button } from 'antd';
-
-
-const { Panel } = Collapse
-
-// import ImageSlider from '../../utils/ImageSlider';
-// import { categories, price } from '.././LandingPage/Sections/Datas';
-// import { set } from 'mongoose';
-
-const { Meta } = Card;
-
+import React from 'react';
+import { Button } from 'antd';
 
 
 function AdminPage() {
-
-    const [Users, setUsers] = useState([]);
-    const [Products, setProducts] = useState([]);
-
 
     return (
         <div style={{ textAlign: 'center' }}>

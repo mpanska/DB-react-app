@@ -17,14 +17,14 @@ const Categories = [
 ]
 
 function UploadProductPage(props) {
-    //--------------Setting default states-----------------------------------
+
     const [TitleValue, setTitleValue] = useState("")
     const [DescriptionValue, setDescriptionValue] = useState("")
     const [PriceValue, setPriceValue] = useState(0) 
     const [CategoryValue, setCategoryValue] = useState(1)
     const [Images, setImages] = useState([])
 
-    //-------------functions to allow text change in text fields---------------
+
     const onTitleChange = (event) => {
         setTitleValue(event.currentTarget.value)
     }
@@ -80,7 +80,6 @@ function UploadProductPage(props) {
             </div>
 
             <Form onSubmit={onSubmit} >
-                
                 <label>Nazwa</label>
                 <Input
                     onChange={onTitleChange}
@@ -113,7 +112,6 @@ function UploadProductPage(props) {
                 <br /><br />
 
                 <label>Zalącz obraz towaru</label><br />
-                {/* DropZone */}
                 <FileUpload refreshFunction={updateImages} />
 
                 <br /><br /><br />

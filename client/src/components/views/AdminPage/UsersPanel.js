@@ -1,42 +1,132 @@
-import React,  { useEffect, useState }  from 'react';
+import React, { useEffect, useState } from 'react'
 import Axios from 'axios';
-import { Collapse, Button, Form, Input } from 'antd';
-import { Formik } from 'formik';
+import { Col, Card, Row, Button, Form, Input, Collapse, Typography } from 'antd';
 import { registerUser, updateUser } from "../../../_actions/user_actions";
 import * as Yup from 'yup';
+import SearchFeature from '../LandingPage/Sections/SearchFeature';
+import { Formik } from 'formik';
 import { useDispatch } from "react-redux";
+
+const { Meta } = Card;
 const { Panel } = Collapse
 
-const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-    },
+
+function UsersPanel() {
+    const dispatch = useDispatch();
+
+    const [Users, setUsers] = useState([])
+    const [SearchTerms, setSearchTerms] = useState("")
+ 
+//-----------------------------EDIT USER ---------------------------
+  function editUser(id) {
+    return (
+      <Formik
+        onSubmit={(values, { setSubmitting }) => {
+          setTimeout(() => {
+            let dataToSubmit = {
+              email: values.email,
+              password: values.password,
+              name: values.name,
+              lastname: values.lastname,
+              role: values.role 
+            };
+  
+            dispatch(updateUser(dataToSubmit, id)).then(response => {
+              if (response.payload.success) {
+                alert('Edytowano użytkownika')
+                window.location.reload();
+              } else {
+                alert("Edycja Zakończona")
+                window.location.reload();
+              }
+            })
+            setSubmitting(false);
+          }, 500);
+        }}
+      >
+        {props => {
+          const {
+            values,
+            isSubmitting,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+          } = props;
+          return (
+            <div>
+              <Form style={{maxWidth: '450px'}} onSubmit={handleSubmit} >
+                <Form.Item label="Imię">
+                  <Input
+                    id="name"
+                    placeholder="Imię"
+                    type="text"
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </Form.Item>
+  
+                <Form.Item label="Nazwisko">
+                  <Input
+                    id="lastname"
+                    placeholder="Nazwisko"
+                    type="text"
+                    value={values.lastname}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </Form.Item>
+  
+                <Form.Item label="Email" hasFeedback>
+                  <Input
+                    id="email"
+                    placeholder="Email"
+                    type="email"
+                    value={values.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </Form.Item>
+  
+                <Form.Item label="Hasło" hasFeedback>
+                  <Input
+                    id="password"
+                    placeholder="Hasło"
+                    type="password"
+                    value={values.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </Form.Item>
+  
+                <Form.Item label="Rola" hasFeedback>
+                  <Input
+                    id="role"
+                    placeholder="Rola użytkownika"
+                    type="number"
+                    value={values.role}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </Form.Item>
+  
+                <Form.Item >
+                  <Button onClick={handleSubmit} type="primary" disabled={isSubmitting}>
+                    Zapisz zmiany
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+          );
+        }}
+      </Formik>
+    );
 };
-  const tailFormItemLayout = {
-    wrapperCol: {
-      xs: {
-        span: 24,
-        offset: 0,
-      },
-      sm: {
-        span: 16,
-        offset: 8,
-      },
-    },
-};
 
+  const addUserFun = addUser();
 
-function UsersPanel(props) {
-  const dispatch = useDispatch()
-
-  //-----------------------------ADD USER ---------------------------
+//-----------------------------ADD USER ---------------------------
   function addUser() {
-
         return (
           <Formik
             initialValues={{
@@ -55,7 +145,6 @@ function UsersPanel(props) {
             })}
       
             onSubmit={(values, { setSubmitting }) => {
-                
               setTimeout(() => {
                 let dataToSubmit = {
                   email: values.email,
@@ -77,7 +166,6 @@ function UsersPanel(props) {
               }, 500);
             }}
           >
-            
             {props => {
               const {
                 values,
@@ -91,7 +179,7 @@ function UsersPanel(props) {
               return (
                 <div>
                   <h2>Dodaj nowego użytkownika</h2>
-                  <Form style={{maxWidth: '450px'}}  {...formItemLayout} onSubmit={handleSubmit} >
+                  <Form style={{maxWidth: '500px'}}  onSubmit={handleSubmit} >
       
                     <Form.Item required label="Imię">
                       <Input
@@ -178,7 +266,7 @@ function UsersPanel(props) {
                       )}
                     </Form.Item>
       
-                    <Form.Item {...tailFormItemLayout}>
+                    <Form.Item>
                       <Button onClick={handleSubmit} type="primary" disabled={isSubmitting}>
                         Dodaj
                       </Button>
@@ -192,225 +280,95 @@ function UsersPanel(props) {
   };
 
 
-  //-----------------------------EDIT USER ---------------------------
+    useEffect(() => {
+        getUsers()
+    }, [])
 
-      
-  function editUser(id) {
-    return (
-      <Formik
-    
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            let dataToSubmit = {
-              email: values.email,
-              password: values.password,
-              name: values.name,
-              lastname: values.lastname,
-              role: values.role 
-            };
-  
-            dispatch(updateUser(dataToSubmit, id)).then(response => {
-              if (response.payload.success) {
-                alert('Edytowano użytkownika')
-                window.location.reload();
-              } else {
-                alert("Edycja Zakończona")
-                window.location.reload();
-              }
+    const getUsers = (variables) => {
+        Axios.post('/api/users/getUsers', variables)
+            .then(response => {
+                if (response.data.success) {
+                  setUsers(response.data.users)
+                } else {
+                  alert('Nie udało się pobrać dane')
+                }
             })
-            setSubmitting(false);
-          }, 500);
-        }}
-      >
-        
-        {props => {
-          const {
-            values,
-            touched,
-            errors,
-            isSubmitting,
-            handleChange,
-            handleBlur,
-            handleSubmit,
-          } = props;
-          return (
-            <div>
-              <Form style={{maxWidth: '450px'}}  {...formItemLayout} onSubmit={handleSubmit} >
-                <Form.Item label="Imię">
-                  <Input
-                    id="name"
-                    placeholder="Imię"
-                    type="text"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                </Form.Item>
-  
-                <Form.Item label="Nazwisko">
-                  <Input
-                    id="lastname"
-                    placeholder="Nazwisko"
-                    type="text"
-                    value={values.lastname}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                </Form.Item>
-  
-                <Form.Item label="Email" hasFeedback>
-                  <Input
-                    id="email"
-                    placeholder="Email"
-                    type="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                </Form.Item>
-  
-                <Form.Item label="Hasło" hasFeedback>
-                  <Input
-                    id="password"
-                    placeholder="Hasło"
-                    type="password"
-                    value={values.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                </Form.Item>
-  
-                <Form.Item label="Rola" hasFeedback>
-                  <Input
-                    id="role"
-                    placeholder="Rola użytkownika"
-                    type="number"
-                    value={values.role}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                </Form.Item>
-  
-                <Form.Item {...tailFormItemLayout}>
-                  <Button onClick={handleSubmit} type="primary" disabled={isSubmitting}>
-                    Zapisz zmiany
-                  </Button>
-                </Form.Item>
-              </Form>
-            </div>
-          );
-        }}
-      </Formik>
-    );
-};
+    }
 
 
-
-  const addUserFun = addUser();
-  const EditUserFun = editUser();
-  const [Users, setUsers] = useState([]);
-
-  useEffect(() => {
-    Axios.post('/api/users/getUsers')
-      .then(response => {
-        if (response.data.success) {
-          setUsers(response.data.users)
-          console.log(response.data.users)
-        } else {
-          alert('Nie udało się pobrać dane')
-        }
-      })
-  },[])
-
-    
-   
-    const renderUsers = Users.map((user, index) => {
-      const deleteUser = event => {
+    const renderCards = Users.map((users, index) => {
+       const deleteUser = event => {
           event.preventDefault();
-            Axios.delete(`/api/users/${user._id}`)
+            Axios.delete(`/api/users/${users._id}`)
               .then(res => {
-                alert(`Usunięto użytkownika ${user.name} ${user.lastname} o id ${user._id}`)
+                alert(`Usunięto użytkownika ${users.name} ${users.lastname} o id ${users._id}`)
                 console.log(res);
                 console.log(res.data);
                 window.location.reload();
         })
       }
 
-    //   const editUserConst = event => {
-    //     event.preventDefault();
-    //       Axios.post(`/api/users/editUser/${user._id}`)
-    //         .then(res => {
-    //           alert(`Edytowano użytkownika o id ${user._id}`)
-    //           console.log(res);
-    //           console.log(res.data);
-    //           window.location.reload();
-    //   })
-    // }
-
-      return(
-            <div>
-                <ul style={{listStyle:"none"}}>
-                    <li>
-                        id: {user._id}
-                    </li>
-                    <li>
-                        Imię: {user.name}
-                    </li>
-                    <li>
-                        Nazwisko: {user.lastname}
-                    </li>
-                    <li>
-                        email: {user.email}
-                    </li>
-                    <li>
-                        hasło: {user.password}
-                    </li>
-                    <li>
-                        Poziom dostępu: {user.role}
-                    </li>
-                    <li style={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
-                      <Button onClick={deleteUser}>Usuń</Button> 
-                      <br />
-                      <Collapse style={{textAlign: 'center'}}>
-                        <Panel header="Edytuj" > 
-                          {editUser(user._id)}
-                        </Panel>
-                      </Collapse> 
-                      <br />
-                    </li>
-                    <li>
-                    
-                    </li>
-                </ul>
-            </div>
-        )
-       
+        return <Col lg={12} md={8} xs={24}>
+            <Card
+                hoverable={true}
+            >
+                <Meta
+                    title={users._id}
+                />
+                <br /><br />
+                <p>Imię : {users.name}</p>
+                <p>Nazwisko : {users.lastname}</p>
+                <p>Email : {users.email}</p>
+                <p>Hasło : {users.password}</p>
+                <p>Poziom dostępu : {users.role}</p>
+                <Button onClick={deleteUser}>Usuń</Button>
+                <br /><br />
+                <Collapse style={{textAlign: 'center'}}>
+                  <Panel header="Edytuj" > 
+                    {editUser(users._id)}
+                  </Panel>
+                </Collapse> 
+            </Card>
+        </Col>
     })
 
 
+    const updateSearchTerms = (newSearchTerm) => {
+      const variables = {
+        searchTerm: newSearchTerm
+      }
+      setSearchTerms(newSearchTerm)
+      getUsers(variables)
+    }
+
+
     return (
+      <div style={{ width: '75%', margin: '3rem auto' }}>
         <div style={{ textAlign: 'center' }}>
-            <h1>Zarządzanie użytkownikami</h1>
-            <br /><br />
-
-            <Collapse>
-                <Panel header="Pokaż wszystkich użytkowników" > 
-                    {renderUsers}
-                </Panel>
-            </Collapse>  
-
-            <br /><br />
-            <Collapse>
-                <Panel header="Dodaj nowego użytkownika" > 
-                   {addUserFun}
-                </Panel>
-            </Collapse>  
-          
-            
-            <br /><br />
+          <h1> Zarządzanie użytkownikami </h1>
         </div>
-    );
-    
+        <Collapse >
+          <Panel header="Dodaj nowego użytkownika" > 
+            {addUserFun}
+          </Panel>
+        </Collapse> 
+
+        <div style={{ margin: '1rem auto', width: '500px', height: '50px'}}>
+          <SearchFeature  refreshFunction={updateSearchTerms} />
+        </div>
+
+        {Users.length === 0 ?
+          <div style={{ display: 'flex', height: '300px', justifyContent: 'center', alignItems: 'center' }}>
+            <h2>Nie znaleziono żadnych użytkowników</h2>
+          </div> :
+          <div>
+            <Row gutter={[16, 16]}>
+              {renderCards}
+            </Row>
+          </div>
+        }
+      </div>
+    )
 }
 
-export default UsersPanel;
+export default UsersPanel

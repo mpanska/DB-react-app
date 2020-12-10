@@ -4,19 +4,18 @@ import { Icon } from 'antd';
 import Axios from 'axios';
 function FileUpload(props) {
 
-    const [Images, setImages] = useState([]) //array for more than one
+    const [Images, setImages] = useState([])
 
     const onDrop = (files) => {
         let formData = new FormData();
         const config = {
-            header: { 'content-type': 'multipart/form-data' } //when we make http req
+            header: { 'content-type': 'multipart/form-data' } 
         }
         formData.append("file", files[0])
-        //save the Image we chose inside the Node Server 
+
         Axios.post('/api/product/uploadImage', formData, config).then(response => {
             if (response.data.success) {
                 setImages([...Images, response.data.image])
-                //setImages(response.data.image) - to add only one image
                 props.refreshFunction([...Images, response.data.image])
 
             } else {
@@ -38,11 +37,7 @@ function FileUpload(props) {
     
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Dropzone
-                onDrop={onDrop}
-                multiple={false}
-                maxSize={800000000}
-            >
+            <Dropzone onDrop={onDrop} multiple={false} maxSize={800000000}>
                 {({ getRootProps, getInputProps }) => (
                     <div style={{
                         width: '240px', height: '240px', border: '1px solid lightgray',
@@ -59,18 +54,13 @@ function FileUpload(props) {
                 )}
             </Dropzone>
 
-{/* scroll thing */}
             <div style={{ display: 'flex', width: '350px', height: '240px', overflowX: 'scroll' }}>
-
                 {Images.map((image, index) => (
                     <div onClick={() => onDelete(image)}>
                         <img style={{ minWidth: '300px', width: '300px', height: '240px' }} src={`http://localhost:5000/${image}`} alt={`productImg-${index}`} />
                     </div>
                 ))}
-
-
             </div>
-
         </div>
     )
 }

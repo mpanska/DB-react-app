@@ -2,9 +2,9 @@
 
 .menu {
   padding: 0 15px;
-  /* border-bottom: solid 1px #e8e8e8; */
+  border-bottom: solid 1px #e8e8e8;
   overflow: auto;
-  /* box-shadow: 0 0 30px #49467a; */
+  box-shadow: 0 0 30px #f0eff3;
   background-color: white;
   margin: 0;
   overflow-y: hidden;
@@ -40,7 +40,7 @@
   height: 32px;
   padding: 6px;
   margin-top: 8px;
-  display: none !important; /* use of important to overwrite ant-btn */
+  display: none !important; 
   background: #3e91f7;
 }
 
@@ -48,7 +48,7 @@
   padding: 0 !important;
 }
 
-/* align header of Drawer with header of page */
+
 .menu_drawer .ant-drawer-header {
   padding: 14px 24px !important;
 }

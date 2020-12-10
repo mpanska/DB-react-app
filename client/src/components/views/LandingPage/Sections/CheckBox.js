@@ -18,11 +18,9 @@ function CheckBox(props) {
         } else {
             newChecked.splice(currentIndex, 1)
         }
-
         setChecked(newChecked)
         props.handleFilters(newChecked)
-        //update this checked information into Parent Component 
-
+      
     }
 
     const renderCheckboxLists = () => props.list && props.list.map((value, index) => (
@@ -42,7 +40,6 @@ function CheckBox(props) {
         <div>
             <Collapse defaultActiveKey={['0']} >
                 <Panel header="Kategorie" key="1"> 
-                {/* <Panel header="Continents" key="1">  */}
                     {renderCheckboxLists()}
                 </Panel>
             </Collapse>

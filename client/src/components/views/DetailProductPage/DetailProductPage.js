@@ -18,7 +18,6 @@ function DetailProductPage(props) {
             .then(response => {
                 setProduct(response.data[0])
             })
-
     }, [])
 
     const addToCartHandler = (productId) => {
@@ -27,11 +26,9 @@ function DetailProductPage(props) {
 
     return (
         <div className="postPage" style={{ width: '100%', padding: '3rem 4rem' }}>
-
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <h1>{Product.title}</h1>
             </div>
-
             <br />
 
             <Row gutter={[16, 16]} >
