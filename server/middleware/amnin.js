@@ -1,13 +1,13 @@
-module.exports = function (req, res, next) {
-    if (req.user && req.user.role === 1) {
-        return next();
-    }
-    res.status(403).json({ error: "You are not an admin." });
-};
-
 const express = require('express');
 const router = express.Router();
 const { User } = require("../models/User");
+
+// module.exports = function (req, res, next) {
+//     if (req.user && req.user.role === 1) {
+//         return next();
+//     }
+//     res.status(403).json({ error: "You are not an admin." });
+// };
 
 
 router.get('/admin', auth, (req, res) => {

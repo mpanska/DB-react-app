@@ -34,7 +34,6 @@ const userSchema = mongoose.Schema({
         type: Array,
         default: []
     },
-    image: String,
     token: {
         type: String,
     },
@@ -42,6 +41,14 @@ const userSchema = mongoose.Schema({
         type: Number
     }
 })
+
+
+userSchema.index({
+    email: 'text',
+    name: 'text',
+    lastname: 'text',
+})
+
 
 userSchema.pre('save', function (next) {
     var user = this;

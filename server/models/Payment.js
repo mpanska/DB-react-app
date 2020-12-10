@@ -13,8 +13,6 @@ const paymentSchema = mongoose.Schema({
         type: Array,
         default: []
     }
-
-
 }, { timestamps: true })
 
 

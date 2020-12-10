@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { Product } = require("../models/Product");
 const multer = require('multer');
-
 const { auth } = require("../middleware/auth");
 
-//picture uploads
+
 var storage = multer.diskStorage({
-    destination: (req, file, cb) => { //where we want to save the file
+    destination: (req, file, cb) => { 
         cb(null, 'uploads/')
     },
     filename: (req, file, cb) => {
@@ -26,7 +25,6 @@ var upload = multer({ storage: storage }).single("file")
 
 
 router.post("/uploadImage", auth, (req, res) => {
-    //after getting img from client we need to save it on node server
     upload(req, res, err => {
         if (err) {
             return res.json({ success: false, err })
@@ -37,7 +35,6 @@ router.post("/uploadImage", auth, (req, res) => {
 
 
 router.post("/uploadProduct", auth, (req, res) => {
-    //save all the data we got from the client into the DB 
     const product = new Product(req.body)
 
     product.save((err) => {
@@ -47,12 +44,24 @@ router.post("/uploadProduct", auth, (req, res) => {
 });
 
 
+router.post('/updateProduct/:id', function(req, res) {
+    Product.findByIdAndUpdate(req.params.id, req.body, function(err, user) {
+        if (err) {
+            res.status(404).send({message: 'Nie udało się edytować produtk'}); 
+            } else {
+                console.log('Powodzenie w edycji produktu');
+                res.send(user);
+            }
+        });       
+});
+
+
+
 router.post("/getProducts", (req, res) => {
     let order = req.body.order ? req.body.order : "desc";
     let sortBy = req.body.sortBy ? req.body.sortBy : "_id";
     let limit = req.body.limit ? parseInt(req.body.limit) : 100;
     let skip = parseInt(req.body.skip);
-
     let findArgs = {};
     let term = req.body.searchTerm;
 
@@ -68,7 +77,6 @@ router.post("/getProducts", (req, res) => {
             }
         }
     }
-
     console.log(findArgs)
 
     if (term) {
@@ -96,13 +104,12 @@ router.post("/getProducts", (req, res) => {
 });
 
 
-//?id=${productId}&type=single
-//id=12121212,121212,1212121   type=array 
+
 router.get("/products_by_id", (req, res) => {
     let type = req.query.type
     let productIds = req.query.id
 
-    console.log("req.query.id", req.query.id)
+    console.log("req.query.id -", req.query.id)
 
     if (type === "array") {
         let ids = req.query.id.split(',');
@@ -114,7 +121,6 @@ router.get("/products_by_id", (req, res) => {
 
     console.log("productIds", productIds)
 
-    //we need to find the product information that belong to product Id 
     Product.find({ '_id': { $in: productIds } })
         .populate('writer')
         .exec((err, product) => {
@@ -123,6 +129,28 @@ router.get("/products_by_id", (req, res) => {
         })
 });
 
+
+router.delete("/:id", (req, res) =>{
+    const id = req.params.id;
+    Product.findByIdAndRemove(id)
+      .then(data => {
+        if (!data) {
+            alert('Nie udało się usunąć produkt o podanym id')
+          res.status(404).send({
+            message: `Nie udało się odnaleźć i usunąć produkt o id ${id}`
+          });
+        } else {
+          res.send({
+            message: `Usunięto produkt o id ${id}`
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500).send({ 
+          message: "Nie udało się usunąć produkt o id" + id
+        });
+      });   
+});
 
 
 module.exports = router;

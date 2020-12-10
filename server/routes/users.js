@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const { Collection } = require('mongoose');
 
 
 router.get("/auth", auth, (req, res) => {
@@ -36,17 +37,18 @@ router.post("/register", (req, res) => {
     });
 });
 
+
 router.post("/login", (req, res) => {
     User.findOne({ email: req.body.email }, (err, user) => {
         if (!user)
             return res.json({
                 loginSuccess: false,
-                message: "email not found"
+                message: "email nie znaleziono"
             });
 
         user.comparePassword(req.body.password, (err, isMatch) => {
             if (!isMatch)
-                return res.json({ loginSuccess: false, message: "wrong password" });
+                return res.json({ loginSuccess: false, message: "niepoprawne hasło" });
 
             user.generateToken((err, user) => {
                 if (err) return res.status(400).send(err);
@@ -73,7 +75,6 @@ router.get("/logout", auth, (req, res) => {
 
 
 router.get('/addToCart', auth, (req, res) => {
-
     User.findOne({ _id: req.user._id }, (err, userInfo) => {
         let duplicate = false;
         console.log(userInfo)
@@ -96,12 +97,11 @@ router.get('/addToCart', auth, (req, res) => {
         } else {
             User.findOneAndUpdate(
                 { _id: req.user._id },
-                {
-                    $push: {
+                {   $push: {
                         cart: {
                             id: req.query.productId,
                             quantity: 1,
-                            date: Date.now()
+                            date: new Date
                         }
                     }
                 },
@@ -111,6 +111,7 @@ router.get('/addToCart', auth, (req, res) => {
                     res.status(200).json(userInfo.cart)
                 }
             )
+            
         }
     })
 });
@@ -150,7 +151,6 @@ router.get('/userCartInfo', auth, (req, res) => {
             let array = cart.map(item => {
                 return item.id
             })
-
             Product.find({ '_id': { $in: array } })
                 .populate('writer')
                 .exec((err, cartDetail) => {
@@ -169,10 +169,9 @@ router.post('/successBuy', auth, (req, res) => {
     let history = [];
     let transactionData = {};
 
-    //1.Put brief Payment Information inside User Collection 
     req.body.cartDetail.forEach((item) => {
         history.push({
-            dateOfPurchase: Date.now(),
+            dateOfPurchase: new Date,
             name: item.title,
             id: item._id,
             price: item.price,
@@ -181,7 +180,6 @@ router.post('/successBuy', auth, (req, res) => {
         })
     })
 
-    //2.Put Payment Information that come from Paypal into Payment Collection 
     transactionData.user = {
         id: req.user._id,
         name: req.user.name,
@@ -203,17 +201,10 @@ router.post('/successBuy', auth, (req, res) => {
             payment.save((err, doc) => {
                 if (err) return res.json({ success: false, err });
 
-                //3. Increase the amount of number for the sold information 
-                //first We need to know how many product were sold in this transaction for 
-                // each of products
-
                 let products = [];
                 doc.product.forEach(item => {
                     products.push({ id: item.id, quantity: item.quantity })
                 })
-
-                // first Item    quantity 2
-                // second Item  quantity 3
 
                 async.eachSeries(products, (item, callback) => {
                     Product.update(
@@ -234,7 +225,6 @@ router.post('/successBuy', auth, (req, res) => {
                         cartDetail: []
                     })
                 })
-
             })
         }
     )
@@ -254,18 +244,6 @@ router.get('/getHistory', auth, (req, res) => {
 
 
 
-//getUsers
-router.post('/getUsers', auth, (req, res) => {
-    User.find()
-    .exec((err, users) => {
-        if(err) return res.status(400).json({success: false, err})
-        res.status(200).json({success: true, users})
-    })
-    
-})
-
-
-//delete
 router.delete("/:id", (req, res) =>{
     const id = req.params.id;
 
@@ -290,38 +268,76 @@ router.delete("/:id", (req, res) =>{
 });
 
 
+router.post('/updateUser/:id', async (req, res) => {
 
-router.post('/updateUser/:id', function(req, res) {
-
-    var password = req.body.password
-
-    bcrypt.genSalt(saltRounds, function (err, salt) {
-        if (err) return next(err);
-
-        bcrypt.hash(password, salt, function (err, hash) {
-            if (err) return next(err);
-            // user.password = hash
-            // next()
-            req.body.password = hash
+    const password = req.body.password
+    if(password){
+        bcrypt.genSalt(saltRounds, function (err, salt) {
+            if(err) console.log(err)
+            bcrypt.hash(password, salt, async (next, hash) =>{
+                if(password === undefined) console.log('-----password undefined-----')
+                if(err) throw(err)
+                req.body.password = await bcrypt.hash(req.body.password, salt)
 
             User.findByIdAndUpdate(req.params.id, req.body, function(err, user) {
                 if (err) {
-                    alert('aaaaa error')
                     res.status(404).send({
-                        message: `Cannot update user. Maybe was not found!`
-                    }); 
+                        message: 'Nie można zaktualizować danych użytkownika'
+                    });  
                 } else {
-                    console.log('Succesfully updated');
+                    console.log('edycja danych: sukces');
                     res.send(user);
                 }
+           
             });
         })
-
-        
     })
-               
+    }else{
+        User.findByIdAndUpdate(req.params.id, req.body, function(err, user) {
+            if (err) {
+                res.status(404).send({
+                    message: 'Nie można zaktualizować danych użytkownika'
+                });  
+            } else {
+                console.log('edycja danych: sukces');
+                res.send(user);
+            }
+        });
+    }
 });
 
+
+
+
+router.post("/getUsers", (req, res) => {
+    let order = req.body.order ? req.body.order : "desc";
+    let sortBy = req.body.sortBy ? req.body.sortBy : "_id";
+    let limit = req.body.limit ? parseInt(req.body.limit) : 100;
+    let findArgs = {};
+    let term = req.body.searchTerm;
+
+    if (term) {
+        User.find(findArgs)
+            .find({ $text: { $search: term } })
+            .populate("writer")
+            .sort([[sortBy, order]])
+            .limit(limit)
+            .exec((err, users) => {
+                console.log(err)
+                if (err) return res.status(400).json({ success: false, err })
+                res.status(200).json({ success: true, users})
+            })
+    } else {
+        User.find(findArgs)
+            .populate("writer")
+            .sort([[sortBy, order]])
+            .limit(limit)
+            .exec((err, users) => {
+                if (err) return res.status(400).json({ success: false, err })
+                res.status(200).json({ success: true, users})
+            })
+    }
+});
 
 
 
