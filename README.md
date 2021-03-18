@@ -1,7 +1,6 @@
 # DB-react-app
 Project of online shop for pwr
 Database used: MongoDB
-Done by Marharyta Panska and Dziyana Shupliakowa
 
 
 To run this project:</br>
